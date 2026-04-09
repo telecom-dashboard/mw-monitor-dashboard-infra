@@ -1,0 +1,151 @@
+name: App Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: dev
+
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - ".github/workflows/app-deploy.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  PROJECT_NAME: "terraform-aws-ecs-multi-env-platform"
+  CONTAINER_NAME: "app"
+
+jobs:
+  deploy:
+    name: Build, Push, and Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'dev' }}
+
+    steps:
+      - name: Determine target environment
+        id: target
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TARGET_ENV="${{ inputs.target_environment }}"
+          else
+            TARGET_ENV="dev"
+          fi
+
+          echo "environment=${TARGET_ENV}" >> "$GITHUB_OUTPUT"
+          echo "ecr_repository=${PROJECT_NAME}-${TARGET_ENV}-app" >> "$GITHUB_OUTPUT"
+          echo "ecs_cluster=${PROJECT_NAME}-${TARGET_ENV}-cluster" >> "$GITHUB_OUTPUT"
+          echo "ecs_service=${PROJECT_NAME}-${TARGET_ENV}-app-svc" >> "$GITHUB_OUTPUT"
+          echo "task_definition_family=${PROJECT_NAME}-${TARGET_ENV}-app" >> "$GITHUB_OUTPUT"
+
+      - name: Guard prod deployments to main
+        if: ${{ steps.target.outputs.environment == 'prod' && github.ref != 'refs/heads/main' }}
+        shell: bash
+        run: |
+          echo "Prod deployments are only allowed from refs/heads/main."
+          exit 1
+
+      - name: Validate required workflow variables
+        shell: bash
+        run: |
+          test -n "${AWS_REGION}" || (echo "Missing repository variable: AWS_REGION" && exit 1)
+          test -n "${{ vars.AWS_APP_ROLE_ARN }}" || (echo "Missing environment variable: AWS_APP_ROLE_ARN" && exit 1)
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_APP_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: app-deploy-${{ github.run_id }}
+
+      - name: Verify caller identity
+        run: aws sts get-caller-identity
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        shell: bash
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ steps.target.outputs.ecr_repository }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+          docker build -t "${IMAGE_URI}" ./app
+          docker push "${IMAGE_URI}"
+
+          echo "image=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
+
+      - name: Download current ECS task definition
+        shell: bash
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "${{ steps.target.outputs.task_definition_family }}" \
+            --query taskDefinition \
+            > task-definition.json
+
+      - name: Render Amazon ECS task definition
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: ${{ steps.target.outputs.ecs_service }}
+          cluster: ${{ steps.target.outputs.ecs_cluster }}
+          wait-for-service-stability: true
+
+      - name: Ensure service desired count is 1
+        shell: bash
+        run: |
+          aws ecs update-service \
+            --cluster "${{ steps.target.outputs.ecs_cluster }}" \
+            --service "${{ steps.target.outputs.ecs_service }}" \
+            --desired-count 1 \
+            >/dev/null
+
+      - name: Wait for ECS service stability after scale-up
+        shell: bash
+        run: |
+          aws ecs wait services-stable \
+            --cluster "${{ steps.target.outputs.ecs_cluster }}" \
+            --services "${{ steps.target.outputs.ecs_service }}"
+
+      - name: Write deployment summary
+        shell: bash
+        run: |
+          {
+            echo "## App deploy summary"
+            echo ""
+            echo "- Environment: \`${{ steps.target.outputs.environment }}\`"
+            echo "- ECR repository: \`${{ steps.target.outputs.ecr_repository }}\`"
+            echo "- ECS cluster: \`${{ steps.target.outputs.ecs_cluster }}\`"
+            echo "- ECS service: \`${{ steps.target.outputs.ecs_service }}\`"
+            echo "- Image: \`${{ steps.build-image.outputs.image }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
