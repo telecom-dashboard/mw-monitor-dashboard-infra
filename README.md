@@ -1,13 +1,18 @@
-# terraform-aws-ecs-multi-env-platform
+# nw-monitor-dashboard-infra
 
-A practical Terraform + GitHub Actions + AWS showcase project for building a multi-environment ECS platform with separate **dev** and **prod** environments.
+This repository is now being used as a separate Terraform repo for the SaaS business infrastructure.
 
-> Current repo state:
-> - Terraform for the shared AWS platform foundation
-> - Terraform for ECS application infrastructure
-> - GitHub Actions Terraform CI for **dev** and **prod**
-> - Separate GitHub Actions application build/deploy workflows for **dev** and **prod**
-> - HTTPS / custom domain work is being added in the environment roots
+Current primary path:
+- `terraform/envs/mvp` for the single-EC2 MVP
+- Route 53 + Elastic IP + Nginx + backend app + PostgreSQL on one EC2 host
+- S3 for static files and uploaded assets
+- basic CloudWatch alarms
+
+Future path:
+- keep the existing ECS-oriented `terraform/envs/dev` and `terraform/envs/prod` roots for the later ALB + ECS migration
+- keep existing ECS, ALB, and ECR modules rather than deleting them now
+
+Read `terraform/envs/mvp/README.md` first for the active deployment path. Older ECS-oriented sections below are retained mainly as reference for the later migration path.
 
 ---
 
@@ -429,3 +434,18 @@ Strong next improvements after this patch would be:
 - move ECR into a separate persistent root if you want image persistence across dev destroys
 
 That is where “works” starts turning into “solid”.
+# Repo Direction
+
+This repository is now being used as a separate Terraform repo for the SaaS business infrastructure.
+
+Current primary path:
+- `terraform/envs/mvp` for the single-EC2 MVP
+- Route 53 + Elastic IP + Nginx + backend app + PostgreSQL on one EC2 host
+- S3 for static files and uploaded assets
+- basic CloudWatch alarms
+
+Future path:
+- keep the existing ECS-oriented `terraform/envs/dev` and `terraform/envs/prod` roots for the later ALB + ECS migration
+- keep existing ECS, ALB, and ECR modules rather than deleting them now
+
+Read `terraform/envs/mvp/README.md` first for the active deployment path. Older ECS-oriented sections below are retained mainly as reference for the later migration path.

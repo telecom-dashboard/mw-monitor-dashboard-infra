@@ -1,0 +1,102 @@
+#!/bin/bash
+set -euxo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y nginx postgresql python3 python3-venv python3-pip awscli
+
+mkdir -p /var/www/app
+mkdir -p /opt/app/current
+mkdir -p /opt/app/shared
+
+cat >/etc/systemd/system/${app_systemd_service_name}.service <<EOF
+[Unit]
+Description=SaaS backend application
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/app/current
+Environment=APP_PORT=${app_port}
+Environment=DATABASE_URL=postgresql://${postgres_app_user}:${postgres_app_password}@127.0.0.1:5432/${postgres_db_name}
+Environment=ASSETS_BUCKET_NAME=${assets_bucket_name}
+ExecStart=/bin/bash -lc 'if [ -f /opt/app/current/start.sh ]; then exec /opt/app/current/start.sh; else exec python3 -m http.server ${app_port} --directory /opt/app/current; fi'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat >/etc/nginx/sites-available/app.conf <<EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name ${app_domain_name};
+
+    root /var/www/app;
+    index index.html;
+
+    location = /api {
+        return 308 /api/;
+    }
+
+    location ^~ /api/ {
+        rewrite ^/api/?(.*)$ /\$1 break;
+        proxy_pass http://127.0.0.1:${app_port};
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+}
+EOF
+
+rm -f /etc/nginx/sites-enabled/default
+ln -sf /etc/nginx/sites-available/app.conf /etc/nginx/sites-enabled/app.conf
+
+systemctl enable nginx
+systemctl restart nginx
+
+systemctl enable postgresql
+systemctl restart postgresql
+
+if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${postgres_db_name}'" | grep -q 1; then
+  sudo -u postgres createdb "${postgres_db_name}"
+fi
+
+sudo -u postgres psql <<EOF
+DO \$\$
+BEGIN
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${postgres_app_user}') THEN
+      CREATE ROLE ${postgres_app_user} LOGIN PASSWORD '${postgres_app_password}';
+   ELSE
+      ALTER ROLE ${postgres_app_user} WITH LOGIN PASSWORD '${postgres_app_password}';
+   END IF;
+END
+\$\$;
+GRANT ALL PRIVILEGES ON DATABASE ${postgres_db_name} TO ${postgres_app_user};
+EOF
+
+chown -R ubuntu:ubuntu /opt/app
+chown -R www-data:www-data /var/www/app
+
+cat >/var/www/app/index.html <<EOF
+<html>
+  <body>
+    <h1>${app_systemd_service_name}</h1>
+    <p>MVP frontend placeholder is ready for ${app_domain_name}.</p>
+  </body>
+</html>
+EOF
+
+systemctl daemon-reload
+systemctl enable ${app_systemd_service_name}
+systemctl restart ${app_systemd_service_name}

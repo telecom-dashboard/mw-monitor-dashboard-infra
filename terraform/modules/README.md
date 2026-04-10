@@ -3,6 +3,7 @@
 This folder contains the reusable Terraform building blocks used by the environment roots:
 
 - `terraform/envs/dev`
+- `terraform/envs/mvp`
 - `terraform/envs/prod`
 
 The goal is to keep environment roots thin and keep shared infrastructure logic in one place.
@@ -28,6 +29,15 @@ Creates:
 ### `cloudwatch_logs`
 Creates the application log group used by ECS.
 
+### `cloudwatch_ec2_basic`
+Creates basic CloudWatch alarms for the single EC2 MVP host.
+
+### `ec2_security_group`
+Creates the public security group for the single EC2 MVP host.
+
+### `ec2_host`
+Creates the EC2 instance, Elastic IP, and host IAM profile used by the MVP environment.
+
 ### `ecs_cluster`
 Creates the ECS cluster and container insights settings.
 
@@ -52,6 +62,9 @@ Creates the ECS service that registers tasks behind the target group.
 ### `platform`
 Reserved for higher-level composition or future shared orchestration patterns.
 
+### `s3_assets_bucket`
+Creates the S3 bucket used for static files and uploaded assets in the MVP environment.
+
 ---
 
 ## Design rules
@@ -63,6 +76,7 @@ Modules here should be:
 - free of hard-coded dev/prod values whenever possible
 
 Environment-specific settings belong in:
+- `terraform/envs/mvp`
 - `terraform/envs/dev`
 - `terraform/envs/prod`
 - per-environment tfvars files
@@ -74,9 +88,11 @@ Environment-specific settings belong in:
 Good candidates:
 - shared network logic
 - shared logging logic
+- shared EC2 host logic
 - shared load balancing logic
 - shared container platform logic
 - shared ECS and ECR logic
+- shared storage logic
 
 ---
 
@@ -98,7 +114,7 @@ That stuff belongs elsewhere.
 The intended pattern is:
 
 1. define reusable logic here
-2. wire modules together in `envs/dev` and `envs/prod`
+2. wire modules together in `envs/mvp`, `envs/dev`, and `envs/prod`
 3. keep environment values in tfvars
 4. expose useful outputs from the environment roots
 

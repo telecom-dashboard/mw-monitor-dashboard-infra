@@ -57,8 +57,8 @@ health_check_grace_period_seconds = 60
 enable_https = true
 
 route53_zone_name   = "buildwithhein.com"
-route53_record_name = "dev"
-acm_domain_name     = "dev.buildwithhein.com"
+route53_record_name = "dev.monitor"
+acm_domain_name     = "dev.monitor.buildwithhein.com"
 
 alb_ssl_policy                 = "ELBSecurityPolicy-TLS13-1-2-2021-06"
 route53_evaluate_target_health = true
