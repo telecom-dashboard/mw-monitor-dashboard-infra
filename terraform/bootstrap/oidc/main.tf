@@ -44,22 +44,3 @@ resource "aws_iam_role" "github_actions" {
   name               = var.role_name
   assume_role_policy = data.aws_iam_policy_document.github_oidc_assume_role.json
 }
-
-data "aws_iam_policy_document" "github_test_permissions" {
-  statement {
-    sid    = "AllowStsCallerIdentity"
-    effect = "Allow"
-
-    actions = [
-      "sts:GetCallerIdentity"
-    ]
-
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_role_policy" "github_test_permissions" {
-  name   = "${var.role_name}-test"
-  role   = aws_iam_role.github_actions.id
-  policy = data.aws_iam_policy_document.github_test_permissions.json
-}

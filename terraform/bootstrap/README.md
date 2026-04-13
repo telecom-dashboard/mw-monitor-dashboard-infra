@@ -12,7 +12,7 @@ These roots are different from `terraform/envs/dev` and `terraform/envs/prod` be
 Creates the persistent S3 bucket used for Terraform remote state.
 
 ### `oidc/`
-Creates the GitHub Actions OIDC provider and a small test role/policy used to validate GitHub-to-AWS authentication.
+Creates the GitHub Actions OIDC provider and the bootstrap IAM role trusted by GitHub Actions.
 
 ### `terraform-ci-roles/`
 Creates the IAM roles used by GitHub Actions for this repo, including:
@@ -98,8 +98,8 @@ After bootstrap is applied, update these repository variables:
 - `TF_STATE_BUCKET_NAME`
 - `AWS_TERRAFORM_DEV_ROLE_ARN`
 - `AWS_TERRAFORM_PROD_ROLE_ARN`
-- `AWS_APP_DEV_ROLE_ARN`
-- `AWS_APP_PROD_ROLE_ARN`
+- `AWS_APP_ROLE_ARN` in the `dev` GitHub environment
+- `AWS_APP_ROLE_ARN` in the `prod` GitHub environment
 
 Without those, GitHub Actions cannot run the Terraform or app deployment workflows correctly.
 

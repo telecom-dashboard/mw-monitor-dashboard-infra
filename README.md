@@ -290,10 +290,10 @@ Required variables:
 - `AWS_TERRAFORM_PROD_ROLE_ARN`
   ARN of the prod Terraform CI role created by `terraform/bootstrap/terraform-ci-roles`
 
-- `AWS_APP_DEV_ROLE_ARN`
+- `AWS_APP_ROLE_ARN` in the `dev` GitHub environment
   ARN of the dev app build/deploy role created by `terraform/bootstrap/terraform-ci-roles`
 
-- `AWS_APP_PROD_ROLE_ARN`
+- `AWS_APP_ROLE_ARN` in the `prod` GitHub environment
   ARN of the prod app build/deploy role created by `terraform/bootstrap/terraform-ci-roles`
 
 ### Why the workflow injects backend config

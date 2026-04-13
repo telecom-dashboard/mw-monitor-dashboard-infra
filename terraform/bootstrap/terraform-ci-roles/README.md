@@ -71,8 +71,8 @@ Expected repository variables:
 - `TF_STATE_BUCKET_NAME`
 - `AWS_TERRAFORM_DEV_ROLE_ARN`
 - `AWS_TERRAFORM_PROD_ROLE_ARN`
-- `AWS_APP_DEV_ROLE_ARN`
-- `AWS_APP_PROD_ROLE_ARN`
+- `AWS_APP_ROLE_ARN` in the `dev` GitHub environment
+- `AWS_APP_ROLE_ARN` in the `prod` GitHub environment
 
 The workflows use these variables to:
 - assume the correct Terraform or app deploy role

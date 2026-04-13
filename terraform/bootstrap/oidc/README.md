@@ -1,6 +1,6 @@
 # bootstrap oidc
 
-This Terraform root creates the GitHub Actions OIDC provider and a small test role for validating GitHub-to-AWS authentication.
+This Terraform root creates the GitHub Actions OIDC provider and the bootstrap IAM role trusted by that provider.
 
 ---
 
@@ -8,7 +8,6 @@ This Terraform root creates the GitHub Actions OIDC provider and a small test ro
 
 - GitHub Actions OIDC provider for `token.actions.githubusercontent.com`
 - IAM role trusted by that provider
-- small inline policy that allows `sts:GetCallerIdentity`
 
 This is the first AWS-side building block needed for GitHub Actions OIDC.
 
@@ -69,7 +68,7 @@ Import it instead, for example:
 terraform import aws_iam_openid_connect_provider.github arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com
 ```
 
-If the test role already exists, import that too before planning.
+If the IAM role already exists, import that too before planning.
 
 ---
 
