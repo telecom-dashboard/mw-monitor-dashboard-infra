@@ -62,6 +62,30 @@ variable "route53_record_name" {
   default     = ""
 }
 
+variable "deploy_target_tag_key" {
+  description = "Stable EC2 tag key used by the MVP app repo to target the host for SSM deploys"
+  type        = string
+  default     = "DeployTarget"
+}
+
+variable "deploy_target_tag_value" {
+  description = "Stable EC2 tag value used by the MVP app repo to target the host for SSM deploys"
+  type        = string
+  default     = "nw-monitor-dashboard-mvp-app-host"
+}
+
+variable "enable_https" {
+  description = "Whether to provision HTTPS on the MVP EC2 host with Let's Encrypt."
+  type        = bool
+  default     = false
+}
+
+variable "letsencrypt_email" {
+  description = "Email address used for Let's Encrypt registration when HTTPS is enabled."
+  type        = string
+  default     = ""
+}
+
 variable "app_port" {
   description = "Internal backend application port on the EC2 host"
   type        = number

@@ -14,6 +14,7 @@ It is intentionally separate from the existing ECS-oriented `dev` and `prod` roo
 - Nginx reverse proxy bootstrap
 - frontend/static site on `/`
 - backend reverse proxy on `/api`
+- optional HTTPS on the EC2 host using Nginx + Let's Encrypt
 - backend app runtime bootstrap placeholders on the same EC2 host
 - PostgreSQL bootstrap on the same EC2 host
 - S3 bucket for static files and assets
@@ -53,13 +54,15 @@ Nginx is prepared for a same-domain app layout:
 - `/` serves the frontend/static files
 - `/api/` proxies to the backend app running on `127.0.0.1`
 
+When `enable_https = true`, the EC2 host bootstraps Certbot, provisions a Let's Encrypt certificate for the MVP domain, redirects HTTP to HTTPS, and enables automatic renewal via `certbot.timer`.
+
 ## App deploy path
 
 The intended MVP deployment flow for the separate app repo is:
 - GitHub Actions in `Arconish/telecom`
 - GitHub OIDC into a dedicated MVP app deploy IAM role
 - artifact upload to the existing MVP assets bucket under `releases/`
-- SSM Run Command against the single MVP EC2 host
+- SSM Run Command against the single MVP EC2 host using the stable deploy tag `DeployTarget=nw-monitor-dashboard-mvp-app-host`
 
 This MVP path intentionally does **not** use ECS or ECR.
 

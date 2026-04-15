@@ -68,3 +68,9 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "instance_tags" {
+  description = "Additional tags applied only to the EC2 instance"
+  type        = map(string)
+  default     = {}
+}

@@ -51,7 +51,7 @@ locals {
     "${local.mvp_releases_prefix_normalized}/*",
   ]
   mvp_releases_object_arn           = "${local.mvp_assets_bucket_arn}/${local.mvp_releases_prefix_normalized}/*"
-  mvp_app_instance_arn              = "arn:${local.partition}:ec2:${var.aws_region}:${local.account_id}:instance/${var.mvp_app_instance_id}"
+  mvp_app_instance_arn_pattern      = "arn:${local.partition}:ec2:${var.aws_region}:${local.account_id}:instance/*"
   ssm_run_shell_script_document_arn = "arn:${local.partition}:ssm:${var.aws_region}::document/AWS-RunShellScript"
   mvp_app_allowed_subs = compact([
     "repo:${var.mvp_app_github_org}/${var.mvp_app_github_repo}:ref:refs/heads/${var.mvp_app_github_branch}",
@@ -1913,8 +1913,26 @@ data "aws_iam_policy_document" "mvp_app_deploy_permissions" {
 
     resources = [
       local.ssm_run_shell_script_document_arn,
-      local.mvp_app_instance_arn,
     ]
+  }
+
+  statement {
+    sid    = "AllowSendCommandToTaggedMvpHost"
+    effect = "Allow"
+
+    actions = [
+      "ssm:SendCommand"
+    ]
+
+    resources = [
+      local.mvp_app_instance_arn_pattern,
+    ]
+
+    condition {
+      test     = "StringLike"
+      variable = "ssm:resourceTag/${var.mvp_deploy_target_tag_key}"
+      values   = [var.mvp_deploy_target_tag_value]
+    }
   }
 
   statement {

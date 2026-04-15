@@ -98,12 +98,10 @@ Example:
 ```bash
 terraform plan \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
-  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
-  -var="mvp_app_instance_id=i-0123456789abcdef0"
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET"
 terraform apply \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
-  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
-  -var="mvp_app_instance_id=i-0123456789abcdef0"
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET"
 ```
 
 That is better than hard-coding old account-specific S3 ARNs into policy documents.
@@ -157,16 +155,14 @@ terraform fmt -check
 terraform validate
 terraform plan \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
-  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
-  -var="mvp_app_instance_id=i-0123456789abcdef0"
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET"
 ```
 
 Apply:
 ```bash
 terraform apply \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
-  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
-  -var="mvp_app_instance_id=i-0123456789abcdef0"
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET"
 ```
 
 ---
@@ -203,4 +199,4 @@ So yes, this folder deserves paranoia.
 - `bootstrap/terraform-ci-roles` gives Terraform CI and app deploy workflows the right roles and permissions
 - `envs/dev` and `envs/prod` use those roles to manage infrastructure
 - `.github/workflows/app-deploy.yml` uses the app roles to push images and deploy ECS
-- `envs/mvp` provides the EC2 instance ID and assets bucket consumed by the MVP app deploy role
+- `envs/mvp` provides the stable deploy tag and assets bucket consumed by the MVP app deploy role

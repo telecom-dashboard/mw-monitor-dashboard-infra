@@ -43,14 +43,24 @@ output "route53_record_fqdn" {
   value       = aws_route53_record.app.fqdn
 }
 
+output "deploy_target_tag_key" {
+  description = "Stable EC2 tag key used by the app repo for MVP SSM deploy targeting"
+  value       = var.deploy_target_tag_key
+}
+
+output "deploy_target_tag_value" {
+  description = "Stable EC2 tag value used by the app repo for MVP SSM deploy targeting"
+  value       = var.deploy_target_tag_value
+}
+
 output "application_url" {
   description = "Preferred MVP application URL"
-  value       = "http://${local.route53_record_fqdn}"
+  value       = "${var.enable_https ? "https" : "http"}://${local.route53_record_fqdn}"
 }
 
 output "api_base_url" {
   description = "MVP API base URL exposed through Nginx"
-  value       = "http://${local.route53_record_fqdn}/api"
+  value       = "${var.enable_https ? "https" : "http"}://${local.route53_record_fqdn}/api"
 }
 
 output "assets_bucket_name" {

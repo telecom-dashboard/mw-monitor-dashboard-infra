@@ -70,12 +70,10 @@ cd ../terraform-ci-roles
 terraform init
 terraform plan \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
-  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
-  -var="mvp_app_instance_id=i-0123456789abcdef0"
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET"
 terraform apply \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
-  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
-  -var="mvp_app_instance_id=i-0123456789abcdef0"
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET"
 ```
 
 Then move on to:

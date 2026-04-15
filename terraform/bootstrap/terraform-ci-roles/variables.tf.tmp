@@ -152,9 +152,16 @@ variable "mvp_assets_bucket_name" {
   type        = string
 }
 
-variable "mvp_app_instance_id" {
-  description = "EC2 instance ID of the MVP app host targeted by SSM Run Command"
+variable "mvp_deploy_target_tag_key" {
+  description = "EC2 tag key used to target the MVP app host for SSM Run Command"
   type        = string
+  default     = "DeployTarget"
+}
+
+variable "mvp_deploy_target_tag_value" {
+  description = "EC2 tag value used to target the MVP app host for SSM Run Command"
+  type        = string
+  default     = "nw-monitor-dashboard-mvp-app-host"
 }
 
 variable "mvp_releases_prefix" {

@@ -56,11 +56,16 @@ module "ec2_host" {
   enable_detailed_monitoring = var.enable_detailed_monitoring
   assets_bucket_arn          = module.assets_bucket.bucket_arn
   ssm_parameter_path_arn     = "arn:${data.aws_partition.current.partition}:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/nw-monitor/mvp/backend/"
+  instance_tags = {
+    (var.deploy_target_tag_key) = var.deploy_target_tag_value
+  }
   user_data = templatefile("${path.module}/user_data.sh.tftpl", {
     app_domain_name          = local.route53_record_fqdn
     app_port                 = var.app_port
     app_systemd_service_name = var.app_systemd_service_name
     assets_bucket_name       = module.assets_bucket.bucket_name
+    enable_https             = var.enable_https
+    letsencrypt_email        = var.letsencrypt_email
     postgres_app_password    = var.postgres_app_password
     postgres_app_user        = var.postgres_app_user
     postgres_db_name         = var.postgres_db_name

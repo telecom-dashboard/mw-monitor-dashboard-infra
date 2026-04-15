@@ -98,6 +98,7 @@ resource "aws_instance" "this" {
   key_name                    = var.key_name != "" ? var.key_name : null
   monitoring                  = var.enable_detailed_monitoring
   user_data                   = var.user_data
+  user_data_replace_on_change = true
 
   root_block_device {
     volume_size           = var.root_volume_size
@@ -113,7 +114,7 @@ resource "aws_instance" "this" {
 
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-app-host"
-  })
+  }, var.instance_tags)
 }
 
 resource "aws_eip" "this" {
