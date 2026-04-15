@@ -32,8 +32,8 @@ key_name      = ""
 root_volume_size           = 20
 enable_detailed_monitoring = false
 
-assets_bucket_name              = "nw-monitor-dashboard-mvp-assets-123456789012-apse1"
-assets_bucket_force_destroy     = false
+assets_bucket_name               = "nw-monitor-dashboard-mvp-assets-091336586598-apse1"
+assets_bucket_force_destroy      = false
 assets_bucket_versioning_enabled = false
 
 alarm_actions = []

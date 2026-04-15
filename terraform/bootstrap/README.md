@@ -21,11 +21,13 @@ Creates the IAM roles used by GitHub Actions for this repo, including:
 - Terraform CI role for **prod**
 - app deploy role for **dev**
 - app deploy role for **prod**
+- MVP app deploy role for `telecom-dashboard/mw-dashboard-app`
 
 It also grants:
 - backend bucket access for Terraform CI
 - infrastructure permissions for Terraform CI
 - ECR / ECS deployment permissions for the app deploy workflow
+- S3 / SSM permissions for the MVP EC2 deploy workflow
 
 ---
 
@@ -38,6 +40,7 @@ They should not be mixed into the environment roots because that creates ugly de
 - CI needs roles before it can run Terraform
 - Terraform needs backend before it can use remote state
 - app deployment needs app roles before it can push to ECR and deploy ECS
+- MVP app deployment needs its own role before GitHub Actions can upload release artifacts and invoke SSM
 - environments need bootstrap in place before they are safe to use in CI
 
 Keeping bootstrap separate avoids that nonsense.
@@ -65,8 +68,14 @@ terraform apply -var="bucket_name=YOUR_TF_STATE_BUCKET"
 ```bash
 cd ../terraform-ci-roles
 terraform init
-terraform plan -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET"
-terraform apply -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET"
+terraform plan \
+  -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
+  -var="mvp_app_instance_id=i-0123456789abcdef0"
+terraform apply \
+  -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
+  -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET" \
+  -var="mvp_app_instance_id=i-0123456789abcdef0"
 ```
 
 Then move on to:
@@ -85,6 +94,7 @@ After applying `terraform-ci-roles`, the most useful outputs are:
 - `terraform_prod_role_arn`
 - `app_dev_role_arn`
 - `app_prod_role_arn`
+- `mvp_app_deploy_role_arn`
 
 These map directly to GitHub repository variables used by the workflows.
 
@@ -100,6 +110,7 @@ After bootstrap is applied, update these repository variables:
 - `AWS_TERRAFORM_PROD_ROLE_ARN`
 - `AWS_APP_ROLE_ARN` in the `dev` GitHub environment
 - `AWS_APP_ROLE_ARN` in the `prod` GitHub environment
+- `AWS_MVP_APP_DEPLOY_ROLE_ARN`
 
 Without those, GitHub Actions cannot run the Terraform or app deployment workflows correctly.
 
@@ -111,6 +122,7 @@ Without those, GitHub Actions cannot run the Terraform or app deployment workflo
 - bad changes here can break GitHub Actions authentication
 - bad changes here can break Terraform remote state access
 - bad changes here can break app deployment to ECR / ECS
+- bad changes here can break app deployment to the MVP EC2 host
 - bad changes here can break both dev and prod CI in one shot
 
 Treat bootstrap changes with more care than normal environment tuning.

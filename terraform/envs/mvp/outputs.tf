@@ -58,6 +58,16 @@ output "assets_bucket_name" {
   value       = module.assets_bucket.bucket_name
 }
 
+output "releases_s3_prefix" {
+  description = "S3 prefix reserved for MVP release artifacts uploaded by the app repo"
+  value       = "releases/"
+}
+
+output "releases_s3_uri" {
+  description = "S3 URI prefix reserved for MVP release artifacts uploaded by the app repo"
+  value       = "s3://${module.assets_bucket.bucket_name}/releases/"
+}
+
 output "assets_bucket_arn" {
   description = "S3 assets bucket ARN"
   value       = module.assets_bucket.bucket_arn

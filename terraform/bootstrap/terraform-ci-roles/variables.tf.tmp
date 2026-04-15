@@ -43,13 +43,13 @@ variable "infra_github_branch" {
 variable "business_app_github_org" {
   description = "GitHub organization or username trusted for the future business app deploy roles"
   type        = string
-  default     = "Arconish"
+  default     = "telecom-dashboard"
 }
 
 variable "business_app_github_repo" {
   description = "GitHub repository trusted for the future business app deploy roles"
   type        = string
-  default     = "telecom"
+  default     = "mw-dashboard-app"
 }
 
 variable "business_app_github_branch" {

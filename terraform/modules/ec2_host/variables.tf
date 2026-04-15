@@ -52,6 +52,12 @@ variable "assets_bucket_arn" {
   type        = string
 }
 
+variable "ssm_parameter_path_arn" {
+  description = "ARN prefix of SSM Parameter Store values the instance should be able to read"
+  type        = string
+  default     = ""
+}
+
 variable "user_data" {
   description = "User data script used to bootstrap the host"
   type        = string

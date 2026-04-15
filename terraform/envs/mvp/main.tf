@@ -3,6 +3,10 @@ data "aws_route53_zone" "public" {
   private_zone = false
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_partition" "current" {}
+
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -41,26 +45,27 @@ module "assets_bucket" {
 module "ec2_host" {
   source = "../../modules/ec2_host"
 
-  project_name                = var.project_name
-  environment                 = var.environment
-  subnet_id                   = module.vpc.public_subnet_ids[0]
-  security_group_id           = module.ec2_security_group.security_group_id
-  instance_type               = var.instance_type
-  ami_id                      = var.ami_id
-  key_name                    = var.key_name
-  root_volume_size            = var.root_volume_size
-  enable_detailed_monitoring  = var.enable_detailed_monitoring
-  assets_bucket_arn           = module.assets_bucket.bucket_arn
-  user_data                   = templatefile("${path.module}/user_data.sh.tftpl", {
-    app_domain_name         = local.route53_record_fqdn
-    app_port                = var.app_port
+  project_name               = var.project_name
+  environment                = var.environment
+  subnet_id                  = module.vpc.public_subnet_ids[0]
+  security_group_id          = module.ec2_security_group.security_group_id
+  instance_type              = var.instance_type
+  ami_id                     = var.ami_id
+  key_name                   = var.key_name
+  root_volume_size           = var.root_volume_size
+  enable_detailed_monitoring = var.enable_detailed_monitoring
+  assets_bucket_arn          = module.assets_bucket.bucket_arn
+  ssm_parameter_path_arn     = "arn:${data.aws_partition.current.partition}:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/nw-monitor/mvp/backend/"
+  user_data = templatefile("${path.module}/user_data.sh.tftpl", {
+    app_domain_name          = local.route53_record_fqdn
+    app_port                 = var.app_port
     app_systemd_service_name = var.app_systemd_service_name
-    assets_bucket_name      = module.assets_bucket.bucket_name
-    postgres_app_password   = var.postgres_app_password
-    postgres_app_user       = var.postgres_app_user
-    postgres_db_name        = var.postgres_db_name
+    assets_bucket_name       = module.assets_bucket.bucket_name
+    postgres_app_password    = var.postgres_app_password
+    postgres_app_user        = var.postgres_app_user
+    postgres_db_name         = var.postgres_db_name
   })
-  common_tags                 = local.common_tags
+  common_tags = local.common_tags
 }
 
 resource "aws_route53_record" "app" {

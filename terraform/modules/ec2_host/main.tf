@@ -36,6 +36,19 @@ data "aws_iam_policy_document" "s3_access" {
   }
 }
 
+data "aws_iam_policy_document" "ssm_parameter_access" {
+  count = var.ssm_parameter_path_arn != "" ? 1 : 0
+
+  statement {
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+    ]
+
+    resources = ["${var.ssm_parameter_path_arn}*"]
+  }
+}
+
 resource "aws_iam_role" "instance" {
   name = "${local.name_prefix}-app-host-role"
 
@@ -60,6 +73,14 @@ resource "aws_iam_role_policy" "s3_assets" {
   name   = "${local.name_prefix}-assets-access"
   role   = aws_iam_role.instance.id
   policy = data.aws_iam_policy_document.s3_access.json
+}
+
+resource "aws_iam_role_policy" "ssm_parameters" {
+  count = var.ssm_parameter_path_arn != "" ? 1 : 0
+
+  name   = "${local.name_prefix}-ssm-parameters-read"
+  role   = aws_iam_role.instance.id
+  policy = data.aws_iam_policy_document.ssm_parameter_access[0].json
 }
 
 resource "aws_iam_instance_profile" "this" {

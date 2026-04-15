@@ -9,5 +9,6 @@ Included:
 - SSM access
 - CloudWatch Agent policy attachment
 - scoped access to the MVP assets bucket
+- optional scoped read access to SSM Parameter Store paths
 
 The module stays intentionally simple so the environment root can later be replaced by ALB + ECS without fighting hidden abstractions.

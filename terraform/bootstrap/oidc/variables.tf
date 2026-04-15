@@ -7,13 +7,13 @@ variable "aws_region" {
 variable "github_org" {
   description = "GitHub organization or username"
   type        = string
-  default     = "heinzawhtoo"
+  default     = "telecom-dashboard"
 }
 
 variable "github_repo" {
   description = "GitHub repository name"
   type        = string
-  default     = "terraform-aws-ecs-multi-env-platform"
+  default     = "mw-monitor-dashboard-infra"
 }
 
 variable "github_branch" {

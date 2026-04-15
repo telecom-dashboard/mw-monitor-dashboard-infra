@@ -53,6 +53,16 @@ Nginx is prepared for a same-domain app layout:
 - `/` serves the frontend/static files
 - `/api/` proxies to the backend app running on `127.0.0.1`
 
+## App deploy path
+
+The intended MVP deployment flow for the separate app repo is:
+- GitHub Actions in `Arconish/telecom`
+- GitHub OIDC into a dedicated MVP app deploy IAM role
+- artifact upload to the existing MVP assets bucket under `releases/`
+- SSM Run Command against the single MVP EC2 host
+
+This MVP path intentionally does **not** use ECS or ECR.
+
 ## Important MVP tradeoffs
 
 - the database is on the same EC2 host as the app
