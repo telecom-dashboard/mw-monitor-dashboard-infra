@@ -127,8 +127,13 @@ server {
 
     ssl_certificate /etc/letsencrypt/live/${app_domain_name}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${app_domain_name}/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:MVPSSL:10m;
+    ssl_session_tickets off;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
     root /var/www/app;
     index index.html;
