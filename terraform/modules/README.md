@@ -48,7 +48,7 @@ Creates:
 - target group
 
 ### `ecr`
-Creates the ECR repository used by the sample application image.
+Creates the ECR repository used by the future ECS-based application image.
 
 ### `ecs_task_execution_role`
 Creates the execution role used by ECS tasks.

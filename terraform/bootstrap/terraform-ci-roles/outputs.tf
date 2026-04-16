@@ -19,7 +19,7 @@ output "app_prod_role_arn" {
 }
 
 output "mvp_app_deploy_role_arn" {
-  description = "IAM role ARN for GitHub Actions MVP app deploy from Arconish/telecom"
+  description = "IAM role ARN for GitHub Actions MVP app deploy from telecom-dashboard/mw-dashboard-app"
   value       = aws_iam_role.mvp_app_deploy.arn
 }
 

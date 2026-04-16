@@ -2,8 +2,6 @@
 
 This Terraform root creates the GitHub Actions roles needed by this repo.
 
----
-
 ## What it does
 
 This root is responsible for:
@@ -22,13 +20,12 @@ This root is responsible for:
 - granting the ECR / ECS permissions needed for the app deploy workflow
 - granting the S3 / SSM permissions needed for the MVP EC2 deploy workflow
 
----
-
 ## What permissions it is expected to cover
 
 At the current repo state, the roles created here cover two categories.
 
 ### Terraform CI permissions
+
 Terraform CI needs permissions related to:
 - VPC and subnet resources
 - security groups
@@ -46,6 +43,7 @@ Those legacy dev/prod Terraform roles are now disabled by default in this repo.
 The business dev/prod Terraform roles are the active Terraform CI roles for this repo.
 
 ### App deploy permissions
+
 The app deploy roles need permissions related to:
 - `ecr:GetAuthorizationToken`
 - ECR layer upload and image push
@@ -60,6 +58,7 @@ Those legacy ECS / ECR app deploy roles are now disabled by default in this repo
 The business dev/prod app roles are the active ECS / ECR app deploy roles for this repo's future dev/prod path.
 
 ### MVP app deploy permissions
+
 The MVP app deploy role for `telecom-dashboard/mw-dashboard-app` is separate from the Terraform roles and the older ECS / ECR app deploy roles.
 
 It is limited to:
@@ -75,9 +74,7 @@ It is limited to:
 That role is for the current MVP deploy path:
 - GitHub Actions in `telecom-dashboard/mw-dashboard-app`
 - artifact upload to the existing MVP assets bucket under `releases/`
-- SSM Run Command against the single MVP EC2 host
-
----
+- SSM Run Command against the single MVP EC2 host by stable deploy tag
 
 ## Input
 
@@ -95,6 +92,7 @@ The future business app dev/prod roles use:
 - `business_app_github_branch`
 
 Example:
+
 ```bash
 terraform plan \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
@@ -105,8 +103,6 @@ terraform apply \
 ```
 
 That is better than hard-coding old account-specific S3 ARNs into policy documents.
-
----
 
 ## Relationship to GitHub repository variables
 
@@ -142,8 +138,6 @@ The workflows use these variables to:
 
 This keeps the workflows account-aware without hard-coding account-specific values into the workflow files.
 
----
-
 ## Commands
 
 Run from this folder:
@@ -159,24 +153,21 @@ terraform plan \
 ```
 
 Apply:
+
 ```bash
 terraform apply \
   -var="tf_state_bucket_name=YOUR_TF_STATE_BUCKET" \
   -var="mvp_assets_bucket_name=YOUR_MVP_ASSETS_BUCKET"
 ```
 
----
-
 ## Why it is separate
 
 This root is intentionally separate from `terraform/envs/*` because:
 - CI roles are control-plane resources
 - environment roots should assume CI roles already exist
-- app deployment roles should exist before the first image push / deploy
+- app deployment roles should exist before the first image push or deploy
 - the MVP app deploy role should exist before `telecom-dashboard/mw-dashboard-app` tries to upload a release artifact or invoke SSM
 - mixing IAM bootstrap and application infrastructure in one root becomes messy fast
-
----
 
 ## Important caution
 
@@ -188,15 +179,11 @@ A bad change here can break:
 - app deployment to the MVP EC2 host
 - both environments at once
 
-So yes, this folder deserves paranoia.
-
----
-
 ## Relationship to the rest of the repo
 
 - `bootstrap/oidc` enables GitHub OIDC
 - `bootstrap/backend` creates the remote state bucket
 - `bootstrap/terraform-ci-roles` gives Terraform CI and app deploy workflows the right roles and permissions
-- `envs/dev` and `envs/prod` use those roles to manage infrastructure
-- `.github/workflows/app-deploy.yml` uses the app roles to push images and deploy ECS
+- `envs/dev` and `envs/prod` use those roles for the later ECS-oriented environments
 - `envs/mvp` provides the stable deploy tag and assets bucket consumed by the MVP app deploy role
+- `telecom-dashboard/mw-dashboard-app` uses the MVP app deploy role for S3 artifact upload and SSM Run Command

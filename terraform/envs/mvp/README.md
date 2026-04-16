@@ -1,8 +1,8 @@
 # mvp environment
 
-This folder is the Terraform root for the low-cost **mvp** environment.
+This folder is the Terraform root for the current low-cost MVP environment.
 
-It is intentionally separate from the existing ECS-oriented `dev` and `prod` roots.
+It stays separate from `terraform/envs/dev` and `terraform/envs/prod` so the single-host MVP path is clear and the later ALB + ECS migration path stays clean.
 
 ## What mvp provisions
 
@@ -15,20 +15,10 @@ It is intentionally separate from the existing ECS-oriented `dev` and `prod` roo
 - frontend/static site on `/`
 - backend reverse proxy on `/api`
 - optional HTTPS on the EC2 host using Nginx + Let's Encrypt
-- backend app runtime bootstrap placeholders on the same EC2 host
+- backend runtime bootstrap on the same EC2 host
 - PostgreSQL bootstrap on the same EC2 host
-- S3 bucket for static files and assets
+- S3 bucket for static files, uploaded assets, and MVP release artifacts
 - basic CloudWatch alarms
-
-## Why this root exists
-
-The repo was copied from an ECS showcase, but the current business need is a cheap MVP.
-
-Forcing the old `dev` ECS root to become the MVP would blur responsibilities and make the later ALB + ECS migration harder to reason about.
-
-This root keeps the repo honest:
-- `envs/mvp` is the current single-host path
-- `envs/dev` and `envs/prod` stay available for the later ECS/ALB shape
 
 ## Backend note
 
@@ -42,9 +32,9 @@ terraform init -reconfigure -backend-config="bucket=YOUR_TF_STATE_BUCKET"
 terraform plan -var-file="mvp.tfvars"
 ```
 
-## Domain
+## Domain and routing
 
-The MVP domain is:
+The current MVP domain is:
 
 ```text
 mvp.monitor.buildwithhein.com
@@ -58,10 +48,10 @@ When `enable_https = true`, the EC2 host bootstraps Certbot, provisions a Let's 
 
 ## App deploy path
 
-The intended MVP deployment flow for the separate app repo is:
-- GitHub Actions in `Arconish/telecom`
-- GitHub OIDC into a dedicated MVP app deploy IAM role
-- artifact upload to the existing MVP assets bucket under `releases/`
+The current MVP deployment flow depends on the separate app repo:
+- GitHub Actions in `telecom-dashboard/mw-dashboard-app`
+- GitHub OIDC into the dedicated MVP app deploy IAM role
+- artifact upload to the MVP assets bucket under `releases/`
 - SSM Run Command against the single MVP EC2 host using the stable deploy tag `DeployTarget=nw-monitor-dashboard-mvp-app-host`
 
 This MVP path intentionally does **not** use ECS or ECR.
