@@ -21,12 +21,12 @@ web_ingress_cidr_blocks = [
 
 ssh_ingress_cidr_blocks = []
 
-route53_zone_name   = "buildwithhein.com"
-route53_record_name = "mvp.monitor"
+route53_zone_name       = "buildwithhein.com"
+route53_record_name     = "mvp.monitor"
 deploy_target_tag_key   = "DeployTarget"
 deploy_target_tag_value = "nw-monitor-dashboard-mvp-app-host"
-enable_https        = true
-letsencrypt_email   = "ops@buildwithhein.com"
+enable_https            = true
+letsencrypt_email       = "ops@buildwithhein.com"
 
 app_port      = 8000
 instance_type = "t3.micro"
