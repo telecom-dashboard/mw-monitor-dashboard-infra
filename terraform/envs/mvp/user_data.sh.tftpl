@@ -35,7 +35,6 @@ Type=simple
 User=ubuntu
 WorkingDirectory=/opt/app/current
 Environment=APP_PORT=${app_port}
-Environment=DATABASE_URL=postgresql://${postgres_app_user}:${postgres_app_password}@127.0.0.1:5432/${postgres_db_name}
 Environment=ASSETS_BUCKET_NAME=${assets_bucket_name}
 ExecStart=/bin/bash -lc 'if [ -f /opt/app/current/start.sh ]; then exec /opt/app/current/start.sh; else exec python3 -m http.server ${app_port} --directory /opt/app/current; fi'
 Restart=always

@@ -227,7 +227,7 @@ Text topology of the host filesystem:
   -> runtime startup script from the app repo
 
 /opt/app/shared/backend.env
-  -> non-secret runtime environment values
+  -> non-secret runtime environment values such as DB_HOST, DB_PORT, DB_NAME, and DB_USER
 ```
 
 ## IAM and SSM Wiring
@@ -318,6 +318,7 @@ systemd
             -> load /opt/app/shared/backend.env
             -> fetch SECRET_KEY from SSM Parameter Store
             -> fetch DB_PASSWORD from SSM Parameter Store
+            -> build DATABASE_URL at runtime from DB_HOST, DB_PORT, DB_NAME, DB_USER, and DB_PASSWORD
             -> start uvicorn app.main:app
 ```
 
