@@ -42,7 +42,7 @@ mvp.monitor.buildwithhein.com
 
 Nginx is prepared for a same-domain app layout:
 - `/` serves the frontend/static files
-- `/api/` proxies to the backend app running on `127.0.0.1`
+- `/api/` proxies to the backend app running on `127.0.0.1` without stripping the `/api` prefix
 
 When `enable_https = true`, the EC2 host bootstraps Certbot, provisions a Let's Encrypt certificate for the MVP domain, redirects HTTP to HTTPS, and enables automatic renewal via `certbot.timer`.
 

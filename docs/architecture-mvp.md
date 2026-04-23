@@ -32,7 +32,7 @@ EC2 Host (Ubuntu)
   |     |
   |     +-- "/"      -> static frontend files in /var/www/app
   |     |
-  |     +-- "/api/"  -> reverse proxy to backend on 127.0.0.1:${app_port}
+  |     +-- "/api/"  -> reverse proxy to backend on 127.0.0.1:${app_port} with the /api prefix preserved
   |
   +-- systemd service: saas-app
   |     |
@@ -332,7 +332,7 @@ Browser
   -> Elastic IP
   -> Nginx on EC2
        -> "/"     serves frontend files
-       -> "/api/" proxies to backend on localhost
+       -> "/api/" proxies to backend on localhost with the /api prefix preserved
             -> backend talks to local PostgreSQL
 ```
 
@@ -393,7 +393,7 @@ Parameter Store paths:
 
 Public routing:
 - `/` for frontend
-- `/api/` for backend
+- `/api/` for backend, forwarded unchanged to the app repo
 
 If any of these change in the infra repo, the app repo usually needs a matching update.
 
