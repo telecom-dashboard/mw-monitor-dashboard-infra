@@ -45,6 +45,5 @@ cpu_utilization_threshold = 80
 
 postgres_db_name      = "app"
 postgres_app_user     = "app"
-postgres_app_password = "replace-me"
 
 app_systemd_service_name = "saas-app"

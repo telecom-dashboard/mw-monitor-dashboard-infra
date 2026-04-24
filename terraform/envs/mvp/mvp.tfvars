@@ -37,7 +37,7 @@ root_volume_size           = 20
 enable_detailed_monitoring = false
 
 assets_bucket_name               = "nw-monitor-dashboard-mvp-assets-091336586598-apse1"
-assets_bucket_force_destroy      = false
+assets_bucket_force_destroy      = true
 assets_bucket_versioning_enabled = false
 
 alarm_actions = []
@@ -47,6 +47,5 @@ cpu_utilization_threshold = 80
 
 postgres_db_name      = "app"
 postgres_app_user     = "app"
-postgres_app_password = "replace-me"
 
 app_systemd_service_name = "saas-app"

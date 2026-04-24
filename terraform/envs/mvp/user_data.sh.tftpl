@@ -21,9 +21,32 @@ fi
 command -v aws >/dev/null 2>&1
 aws --version
 
+postgres_app_password="$(aws ssm get-parameter \
+  --name "${db_password_parameter_name}" \
+  --with-decryption \
+  --query 'Parameter.Value' \
+  --output text)"
+
 mkdir -p /var/www/app
 mkdir -p /opt/app/current
 mkdir -p /opt/app/shared
+
+cat >/opt/app/shared/backend.env <<EOF
+APP_ENV=production
+APP_DEBUG=false
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_NAME=${postgres_db_name}
+DB_USER=${postgres_app_user}
+DB_PASSWORD=
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+FRONTEND_URL=${app_public_base_url}
+BACKEND_URL=${app_public_base_url}/api
+ALLOWED_ORIGINS=${app_public_base_url}
+SEED_ADMIN_USERNAME=
+SEED_ADMIN_EMAIL=
+SEED_ADMIN_PASSWORD=
+EOF
 
 cat >/etc/systemd/system/${app_systemd_service_name}.service <<EOF
 [Unit]
@@ -179,9 +202,9 @@ sudo -u postgres psql <<EOF
 DO \$\$
 BEGIN
    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${postgres_app_user}') THEN
-      CREATE ROLE ${postgres_app_user} LOGIN PASSWORD '${postgres_app_password}';
+      CREATE ROLE ${postgres_app_user} LOGIN PASSWORD '$${postgres_app_password}';
    ELSE
-      ALTER ROLE ${postgres_app_user} WITH LOGIN PASSWORD '${postgres_app_password}';
+      ALTER ROLE ${postgres_app_user} WITH LOGIN PASSWORD '$${postgres_app_password}';
    END IF;
 END
 \$\$;

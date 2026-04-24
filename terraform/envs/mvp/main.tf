@@ -61,12 +61,13 @@ module "ec2_host" {
   }
   user_data = templatefile("${path.module}/user_data.sh.tftpl", {
     app_domain_name          = local.route53_record_fqdn
+    app_public_base_url      = "${var.enable_https ? "https" : "http"}://${local.route53_record_fqdn}"
     app_port                 = var.app_port
     app_systemd_service_name = var.app_systemd_service_name
     assets_bucket_name       = module.assets_bucket.bucket_name
+    db_password_parameter_name = "/nw-monitor/mvp/backend/db_password"
     enable_https             = var.enable_https
     letsencrypt_email        = var.letsencrypt_email
-    postgres_app_password    = var.postgres_app_password
     postgres_app_user        = var.postgres_app_user
     postgres_db_name         = var.postgres_db_name
   })

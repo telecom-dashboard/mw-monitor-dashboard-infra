@@ -17,6 +17,7 @@ It stays separate from `terraform/envs/dev` and `terraform/envs/prod` so the sin
 - optional HTTPS on the EC2 host using Nginx + Let's Encrypt
 - backend runtime bootstrap on the same EC2 host
 - PostgreSQL bootstrap on the same EC2 host
+- infra-owned `/opt/app/shared/backend.env` seeded with MVP runtime defaults
 - S3 bucket for static files, uploaded assets, and MVP release artifacts
 - basic CloudWatch alarms
 
@@ -53,6 +54,10 @@ The current MVP deployment flow depends on the separate app repo:
 - GitHub OIDC into the dedicated MVP app deploy IAM role
 - artifact upload to the MVP assets bucket under `releases/`
 - SSM Run Command against the single MVP EC2 host using the stable deploy tag `DeployTarget=nw-monitor-dashboard-mvp-app-host`
+
+On first boot, the infra bootstrap creates `/opt/app/shared/backend.env` with the MVP host's DB and public URL settings. The app repo deploy reuses that file if it already exists, which keeps destroy-and-rebuild flows aligned without requiring the app repo's sample `.env` defaults to match MVP.
+
+The EC2 bootstrap also reads `/nw-monitor/mvp/backend/db_password` from SSM Parameter Store before it creates or updates the local PostgreSQL role. That keeps the host's database password aligned with the same secret the app runtime fetches later.
 
 This MVP path intentionally does **not** use ECS or ECR.
 

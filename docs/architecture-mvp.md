@@ -209,6 +209,7 @@ Bootstrap responsibilities:
 - create `/opt/app/shared`
 - create the `saas-app` systemd unit
 - install and initialize PostgreSQL
+- fetch the shared DB password from SSM Parameter Store for local PostgreSQL bootstrap
 - configure Nginx routing for `/` and `/api`
 
 Text topology of the host filesystem:
@@ -227,7 +228,7 @@ Text topology of the host filesystem:
   -> runtime startup script from the app repo
 
 /opt/app/shared/backend.env
-  -> non-secret runtime environment values such as DB_HOST, DB_PORT, DB_NAME, and DB_USER
+  -> infra-seeded non-secret runtime environment values such as DB_HOST, DB_PORT, DB_NAME, DB_USER, and public URLs
 ```
 
 ## IAM and SSM Wiring
@@ -321,6 +322,9 @@ systemd
             -> build DATABASE_URL at runtime from DB_HOST, DB_PORT, DB_NAME, DB_USER, and DB_PASSWORD
             -> start uvicorn app.main:app
 ```
+
+On a brand-new MVP host, the infra bootstrap writes `/opt/app/shared/backend.env` before the first app deploy. That prevents the app repo from falling back to its generic sample `.env` defaults on clean rebuilds.
+It also uses the same `/nw-monitor/mvp/backend/db_password` SSM value to align the local PostgreSQL role password with what the app runtime will fetch later.
 
 ## Request Flow
 

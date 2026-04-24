@@ -169,12 +169,6 @@ variable "postgres_app_user" {
   default     = "app"
 }
 
-variable "postgres_app_password" {
-  description = "Initial PostgreSQL application user password bootstrapped on the EC2 host"
-  type        = string
-  sensitive   = true
-}
-
 variable "app_systemd_service_name" {
   description = "Systemd service name reserved for the backend application"
   type        = string
