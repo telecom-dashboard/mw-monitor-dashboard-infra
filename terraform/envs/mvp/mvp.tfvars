@@ -22,7 +22,7 @@ web_ingress_cidr_blocks = [
 ssh_ingress_cidr_blocks = []
 
 route53_zone_name       = "buildwithhein.com"
-route53_record_name     = "mvp.monitor"
+route53_record_name     = "demo.monitor"
 deploy_target_tag_key   = "DeployTarget"
 deploy_target_tag_value = "nw-monitor-dashboard-mvp-app-host"
 enable_https            = true
@@ -45,7 +45,7 @@ ok_actions    = []
 
 cpu_utilization_threshold = 80
 
-postgres_db_name      = "app"
+postgres_db_name      = "network_ops_db"
 postgres_app_user     = "app"
 
 app_systemd_service_name = "saas-app"

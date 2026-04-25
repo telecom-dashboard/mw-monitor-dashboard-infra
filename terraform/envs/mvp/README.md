@@ -38,7 +38,7 @@ terraform plan -var-file="mvp.tfvars"
 The current MVP domain is:
 
 ```text
-mvp.monitor.buildwithhein.com
+demo.monitor.buildwithhein.com
 ```
 
 Nginx is prepared for a same-domain app layout:
